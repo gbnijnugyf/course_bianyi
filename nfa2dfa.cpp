@@ -25,7 +25,7 @@ Y
 2 2-b->Y
 3 3-~->0 3-a->3 3-b->3
 输出结果应为：
-X X-a->0
+X X-a->0 X-b->1
 Y Y-a->0 Y-b->1
 0 0-a->0 0-b->2
 1 1-a->0 1-b->1
@@ -307,7 +307,7 @@ vector<statusType> statuSet(vector<vector<string>> data, vector<statusType> stat
     vector<statusType> status_;
     bool flag = false; // 设置标志，是否开始数字编号
     status_.insert(status_.end(), status.begin(), status.end());
-    for (int i = 0; i < status_.size(); i++)
+    for (unsigned int i = 0; i < status_.size(); i++)
     {
         if (!status_[i].isSolved) // 未被求解过
         {
@@ -317,7 +317,7 @@ vector<statusType> statuSet(vector<vector<string>> data, vector<statusType> stat
                 // 加入状态集
                 if (statu_temp.size() == 0)
                 {
-                    break;
+                    continue;
                 }
                 statusType temp;
                 temp.isSolved = false;
@@ -397,8 +397,12 @@ vector<statusType> statuSet(vector<vector<string>> data, vector<statusType> stat
 // 从状态集中找出对应集合返回编号
 string findSetNo(vector<statusType> status, vector<string> set)
 {
-    vector<statusType>::iterator it = find_if(status.begin(), status.end(), [&set](const statusType &status)
-                                              { return isSame(status.statu, set); });
+    vector<statusType> status_test = status;
+    vector<statusType>::iterator it = find_if(status_test.begin(), status_test.end(), [&set](const statusType &sta)
+                                              { return isSame(sta.statu, set); });
+    if (it == status_test.end()){
+        return "-1";
+    }
     return (*it).no;
 }
 // 输出传导式
@@ -421,10 +425,6 @@ void outputLine(vector<vector<string>> data, vector<statusType> temp_copy, vecto
             sa.letter = letter;
             sAll.push_back(sa);
         }
-
-        // vector<string> sa = epsilone_clo(data, freshByToken(data, (*it).statu, "a"));
-        // vector<string> sb = epsilone_clo(data, freshByToken(data, (*it).statu, "b"));
-
         if (sAll.size() == 0)
         {
             // 没有传导式，不输出
@@ -434,10 +434,14 @@ void outputLine(vector<vector<string>> data, vector<statusType> temp_copy, vecto
         cout << no;
         for (const statusLetterType &sa : sAll)
         {
-            if (sa.statu.size() > 0)
+            if (sa.statu.size() > 0 && temp_copy.size()>0)
             {
                 cout << " ";
-                outputEx(no, sa.letter, findSetNo(temp_copy, sa.statu));
+                string setNo = findSetNo(temp_copy, sa.statu);
+                if (setNo.compare("-1")==0){
+                    continue;
+                }
+                outputEx(no, sa.letter, setNo);
             }
         }
         cout << endl;
@@ -516,27 +520,6 @@ int main()
     {
         outputLine(data, temp_copy, temp_, toGetNo.no, allLetter);
     }
-    // while (num)
-    // {
-    //     vector<statusType>::iterator it;
-    //     if (!flag_x) //"X"还未输出
-    //     {
-    //         outputLine(data, temp_copy, temp_, "X", allLetter);
-    //         flag_x = true;
-    //     }
-    //     else if (!flag_y) //"Y"还未输出
-    //     {
-    //         outputLine(data, temp_copy, temp_, "Y", allLetter);
-    //         flag_y = true;
-    //     }
-    //     else // 输出数字
-    //     {
-    //         outputLine(data, temp_copy, temp_, no_, allLetter);
-    //         no_ = to_string(atoi(no_.c_str()) + 1);
-    //     }
-
-    //     num--;
-    // }
 
     return 0;
 }
