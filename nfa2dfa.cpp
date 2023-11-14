@@ -30,7 +30,6 @@ Y Y-a->0 Y-b->1
 0 0-a->0 0-b->2
 1 1-a->0 1-b->1
 2 2-a->0 2-b->Y
-
 */
 // 判断两个vector是否含有完全相同的元素
 template <typename T>
@@ -63,8 +62,6 @@ typedef struct statusType
     }
     bool operator>(const statusType &other) const
     {
-        // 根据您的排序规则编写比较逻辑
-        // 返回 true 表示当前对象应该在 other 对象之前，返回 false 表示当前对象应该在 other 对象之后
         return false;
     }
 } statusType;
@@ -108,16 +105,6 @@ vector<vector<string>> input(string path)
 
     inputFile.close();
 
-    // 输出读取并分割后的数据
-    // for (const auto &tokens : data)
-    // {
-    //     for (const auto &token : tokens)
-    //     {
-    //         cout << token << " ";
-    //     }
-    //     cout << endl;
-    // }
-
     return data;
 }
 vector<vector<string>> input()
@@ -137,15 +124,6 @@ vector<vector<string>> input()
         }
         data.push_back(tokens);
     }
-    // 输出读取并分割后的数据
-    // for (const auto &tokens : data)
-    // {
-    //     for (const auto &token : tokens)
-    //     {
-    //         cout << token << " ";
-    //     }
-    //     cout << endl;
-    // }
     return data;
 }
 
@@ -181,25 +159,6 @@ vector<string> explainEX(string ex)
     result.push_back(temp[1]);
     return result;
 }
-// oj好像不支持以下
-// vector<string> explainEX_(string ex)
-// {
-//     vector<string> result; // 3位，分别存放statu1, statu2, in
-//     // 正则匹配 [^->](\w*)
-//     regex pattern(R"([^->](\w*))");
-
-//     regex_iterator<string::iterator> iter(ex.begin(), ex.end(), pattern);
-//     regex_iterator<string::iterator> end;
-
-//     while (iter != end)
-//     {
-//         // string match = iter->str();
-//         // cout << match << endl;
-//         result.push_back(iter->str());
-//         ++iter;
-//     }
-//     return result;
-// }
 
 // 求解ε-closure(I)
 vector<string> epsilone_clo(vector<vector<string>> matrix, vector<string> I)
