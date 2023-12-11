@@ -29,7 +29,7 @@ bool compareFiles(const std::string& file1, const std::string& file2) {
 }
 
 int main() {
-    std::string file1 = "output_cor.txt";
+    std::string file1 = "output_cor_yufa.txt";
     std::string file2 = "output.txt";
 
     if (compareFiles(file1, file2)) {
