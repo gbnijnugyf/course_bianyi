@@ -47,8 +47,8 @@ ofstream write("output.txt");
 ifstream read("testfile.txt");
 void lexAnalysing(string str);
 void init();
-void digitCheck(string str);
-void letterCheck(string str);
+void numbersCheck(string str);
+void wordCheck(string str);
 void stringCheck(string str);
 void charCheck(string str);
 void symbolCheck(string str);
@@ -74,31 +74,17 @@ void parse_sentence();
 void parse_assign_sentence();
 void parse_condition_sentence();
 void parse_condition();
-void parse21_circulate();
+void parse_circulate();
 void parse_step();
 void parse23();
 void parse_callFunc();
-void parse25();
-void parse26();
-void parse27();
-void parse28();
-void parse29();
-void MatchToken(string expected);
-int main()
-{
-    init();
-    lines = 1;
-    string line;
-    while (getline(read, line))
-    {
-        lexAnalysing(line);
-        lines++;
-    }
-    parsing();
-    write.close();
-    read.close();
-    return 0;
-}
+void parse_value_paraFrom();
+void parse_sentenceCol();
+void parse_scanf();
+void parse_printf();
+void parse_return();
+void token_match(string expected);
+
 void init()
 {
     for (int i = 0; i < keyWordKey.size(); i++)
@@ -125,11 +111,11 @@ void lexAnalysing(string str)
         ch = str.at(p);
         if (isdigit(ch))
         {
-            digitCheck(str);
+            numbersCheck(str);
         }
         else if (isalpha(ch) || ch == '_')
         {
-            letterCheck(str);
+            wordCheck(str);
         }
         else if (ch == '"')
         {
@@ -149,7 +135,7 @@ void lexAnalysing(string str)
         }
     }
 }
-void digitCheck(string str)
+void numbersCheck(string str)
 {
 
     string token;
@@ -201,7 +187,7 @@ void digitCheck(string str)
         p--;
     }
 }
-void letterCheck(string str)
+void wordCheck(string str)
 {
     string token;
     token.push_back(str.at(p++));
@@ -339,9 +325,8 @@ void parsing()
 void parse_str()
 {
     // ＜字符串＞ ::=  "｛十进制编码为32,33,35-126的ASCII字符｝"
-    MatchToken("STRCON");
+    token_match("STRCON");
     write << "<字符串>" << endl;
-    cout << "<字符串>" << endl;
 }
 void parse_program()
 {
@@ -372,7 +357,6 @@ void parse_program()
     }
     if (q == Tokens.size())
     {
-        cout << "<程序>" << endl;
         write << "<程序>" << endl;
     }
 }
@@ -381,11 +365,10 @@ void parse_const_describe()
     // ＜常量说明＞ ::=  const＜常量定义＞;{ const＜常量定义＞;}
     do
     {
-        MatchToken("CONSTTK");
+        token_match("CONSTTK");
         parse_const_def(); // ＜常量定义＞
-        MatchToken("SEMICN");
+        token_match("SEMICN");
     } while (Tokens[q] == "CONSTTK");
-    cout << "<常量说明>" << endl;
     write << "<常量说明>" << endl;
 }
 
@@ -394,41 +377,39 @@ void parse_const_def()
     // ＜常量定义＞   ::=   int＜标识符＞＝＜整数＞{,＜标识符＞＝＜整数＞}| char＜标识符＞＝＜字符＞{,＜标识符＞＝＜字符＞}
     if (Tokens[q] == "INTTK")
     {
-        MatchToken("INTTK");
-        MatchToken("IDENFR");
-        MatchToken("ASSIGN");
+        token_match("INTTK");
+        token_match("IDENFR");
+        token_match("ASSIGN");
         parse_Int(); // ＜整数＞
         while (Tokens[q] == "COMMA")
         {
-            MatchToken("COMMA");
-            MatchToken("IDENFR");
-            MatchToken("ASSIGN");
+            token_match("COMMA");
+            token_match("IDENFR");
+            token_match("ASSIGN");
             parse_Int();
         }
     }
     if (Tokens[q] == "CHARTK")
     {
-        MatchToken("CHARTK");
-        MatchToken("IDENFR");
-        MatchToken("ASSIGN");
-        MatchToken("CHARCON");
+        token_match("CHARTK");
+        token_match("IDENFR");
+        token_match("ASSIGN");
+        token_match("CHARCON");
         while (Tokens[q] == "COMMA")
         {
-            MatchToken("COMMA");
-            MatchToken("IDENFR");
-            MatchToken("ASSIGN");
-            MatchToken("CHARCON");
+            token_match("COMMA");
+            token_match("IDENFR");
+            token_match("ASSIGN");
+            token_match("CHARCON");
         }
     }
-    cout << ("<常量定义>") << endl;
     write << ("<常量定义>") << endl;
 }
 
 void parse_unsignedInt()
 {
     // ＜无符号整数＞  ::= ＜非零数字＞｛＜数字＞｝| 0
-    MatchToken("INTCON");
-    cout << ("<无符号整数>") << endl;
+    token_match("INTCON");
     write << ("<无符号整数>") << endl;
 }
 
@@ -436,11 +417,10 @@ void parse_Int()
 {
     // ＜整数＞ ::= ［＋｜－］＜无符号整数＞
     if (Tokens[q] == "PLUS")
-        MatchToken("PLUS");
+        token_match("PLUS");
     else if (Tokens[q] == "MINU")
-        MatchToken("MINU");
+        token_match("MINU");
     parse_unsignedInt(); //<无符号整数>
-    cout << ("<整数>") << endl;
     write << ("<整数>") << endl;
 }
 
@@ -448,11 +428,10 @@ void parse_defHead()
 {
     // ＜声明头部＞ ::=  int＜标识符＞ |char＜标识符＞
     if (Tokens[q] == "INTTK")
-        MatchToken("INTTK");
+        token_match("INTTK");
     else if (Tokens[q] == "CHARTK")
-        MatchToken("CHARTK");
-    MatchToken("IDENFR");
-    cout << ("<声明头部>") << endl;
+        token_match("CHARTK");
+    token_match("IDENFR");
     write << ("<声明头部>") << endl;
 }
 
@@ -462,38 +441,36 @@ void parse_var_describe()
     do
     {
         parse_var_def(); // ＜变量定义＞
-        MatchToken("SEMICN");
+        token_match("SEMICN");
     } while ((Tokens[q] == "INTTK" || Tokens[q] == "CHARTK") &&
              Tokens[q + 1] == "IDENFR" && Tokens[q + 2] != "LPARENT");
-    cout << ("<变量说明>") << endl;
     write << ("<变量说明>") << endl;
 }
 void parse_var_def()
 {
     // ＜变量定义＞ ::= ＜类型标识符＞(＜标识符＞|＜标识符＞'['＜无符号整数＞']'){,(＜标识符＞|＜标识符＞'['＜无符号整数＞']')}
     if (Tokens[q] == "INTTK")
-        MatchToken("INTTK");
+        token_match("INTTK");
     else if (Tokens[q] == "CHARTK")
-        MatchToken("CHARTK");
-    MatchToken("IDENFR");
+        token_match("CHARTK");
+    token_match("IDENFR");
     if (Tokens[q] == "LBRACK")
     {
-        MatchToken("LBRACK");
+        token_match("LBRACK");
         parse_unsignedInt(); //<无符号整数>
-        MatchToken("RBRACK");
+        token_match("RBRACK");
     }
     while (Tokens[q] == "COMMA")
     {
-        MatchToken("COMMA");
-        MatchToken("IDENFR");
+        token_match("COMMA");
+        token_match("IDENFR");
         if (Tokens[q] == "LBRACK")
         {
-            MatchToken("LBRACK");
+            token_match("LBRACK");
             parse_unsignedInt(); //<无符号整数>
-            MatchToken("RBRACK");
+            token_match("RBRACK");
         }
     }
-    cout << ("<变量定义>") << endl;
     write << ("<变量定义>") << endl;
 }
 void parse_funcReturn()
@@ -501,27 +478,25 @@ void parse_funcReturn()
     // ＜有返回值函数定义＞ ::=  ＜声明头部＞'('＜参数表＞')' '{'＜复合语句＞'}'
     parse_defHead(); // ＜声明头部＞
     NVoidFunction.insert({vals[q - 1], 1});
-    MatchToken("LPARENT");
+    token_match("LPARENT");
     parse_paraForm(); // ＜参数表＞
-    MatchToken("RPARENT");
-    MatchToken("LBRACE");
+    token_match("RPARENT");
+    token_match("LBRACE");
     parse_comStatement(); // ＜复合语句＞
-    MatchToken("RBRACE");
-    cout << ("<有返回值函数定义>") << endl;
+    token_match("RBRACE");
     write << ("<有返回值函数定义>") << endl;
 }
 void parse_funcNonReturn()
 {
     // ＜无返回值函数定义＞ ::= void＜标识符＞'('＜参数表＞')''{'＜复合语句＞'}'
-    MatchToken("VOIDTK");
-    MatchToken("IDENFR");
-    MatchToken("LPARENT");
+    token_match("VOIDTK");
+    token_match("IDENFR");
+    token_match("LPARENT");
     parse_paraForm(); // ＜参数表＞
-    MatchToken("RPARENT");
-    MatchToken("LBRACE");
+    token_match("RPARENT");
+    token_match("LBRACE");
     parse_comStatement(); // ＜复合语句＞
-    MatchToken("RBRACE");
-    cout << ("<无返回值函数定义>") << endl;
+    token_match("RBRACE");
     write << ("<无返回值函数定义>") << endl;
 }
 void parse_comStatement()
@@ -536,8 +511,7 @@ void parse_comStatement()
     {
         parse_var_describe(); // ＜变量说明＞
     }
-    parse26(); // ＜语句列＞
-    cout << ("<复合语句>") << endl;
+    parse_sentenceCol(); // ＜语句列＞
     write << ("<复合语句>") << endl;
 }
 void parse_paraForm()
@@ -546,35 +520,33 @@ void parse_paraForm()
     if (Tokens[q] != "RPARENT") // 如果下一个token为右小括号，则为空
     {
         if (Tokens[q] == "INTTK")
-            MatchToken("INTTK");
+            token_match("INTTK");
         else if (Tokens[q] == "CHARTK")
-            MatchToken("CHARTK");
-        MatchToken("IDENFR");
+            token_match("CHARTK");
+        token_match("IDENFR");
         while (Tokens[q] == "COMMA")
         {
-            MatchToken("COMMA");
+            token_match("COMMA");
             if (Tokens[q] == "INTTK")
-                MatchToken("INTTK");
+                token_match("INTTK");
             else if (Tokens[q] == "CHARTK")
-                MatchToken("CHARTK");
-            MatchToken("IDENFR");
+                token_match("CHARTK");
+            token_match("IDENFR");
         }
     }
-    cout << ("<参数表>") << endl;
     write << ("<参数表>") << endl;
 }
 
 void parse_mainFunc()
 {
     // ＜主函数＞ ::= void main‘(’‘)’ ‘{’＜复合语句＞‘}’
-    MatchToken("VOIDTK");
-    MatchToken("MAINTK");
-    MatchToken("LPARENT");
-    MatchToken("RPARENT");
-    MatchToken("LBRACE");
+    token_match("VOIDTK");
+    token_match("MAINTK");
+    token_match("LPARENT");
+    token_match("RPARENT");
+    token_match("LBRACE");
     parse_comStatement(); // ＜复合语句＞
-    MatchToken("RBRACE");
-    cout << ("<主函数>") << endl;
+    token_match("RBRACE");
     write << ("<主函数>") << endl;
 }
 
@@ -582,19 +554,18 @@ void parse_expression()
 {
     // ＜表达式＞ ::= ［＋｜－］＜项＞{＜加法运算符＞＜项＞}
     if (Tokens[q] == "PLUS")
-        MatchToken("PLUS");
+        token_match("PLUS");
     else if (Tokens[q] == "MINU")
-        MatchToken("MINU");
+        token_match("MINU");
     parse_item(); // ＜项＞
     while (Tokens[q] == "PLUS" || Tokens[q] == "MINU")
     {
         if (Tokens[q] == "PLUS")
-            MatchToken("PLUS");
+            token_match("PLUS");
         else if (Tokens[q] == "MINU")
-            MatchToken("MINU");
+            token_match("MINU");
         parse_item(); // ＜项＞
     }
-    cout << ("<表达式>") << endl;
     write << ("<表达式>") << endl;
 }
 
@@ -605,12 +576,11 @@ void parse_item()
     while (Tokens[q] == "MULT" || Tokens[q] == "DIV")
     {
         if (Tokens[q] == "MULT")
-            MatchToken("MULT");
+            token_match("MULT");
         else if (Tokens[q] == "DIV")
-            MatchToken("DIV");
+            token_match("DIV");
         parse_factor(); // ＜因子＞
     }
-    cout << ("<项>") << endl;
     write << ("<项>") << endl;
 }
 
@@ -621,27 +591,26 @@ void parse_factor()
     {
         if (Tokens[q + 1] == "LBRACK")
         {
-            MatchToken("IDENFR");
-            MatchToken("LBRACK");
+            token_match("IDENFR");
+            token_match("LBRACK");
             parse_expression(); // ＜表达式＞
-            MatchToken("RBRACK");
+            token_match("RBRACK");
         }
         else if (Tokens[q + 1] == "LPARENT")
             parse_callFunc(); // ＜有返回值函数调用语句＞
         else
-            MatchToken("IDENFR");
+            token_match("IDENFR");
     }
     else if (Tokens[q] == "LPARENT")
     {
-        MatchToken("LPARENT");
+        token_match("LPARENT");
         parse_expression(); // ＜表达式＞
-        MatchToken("RPARENT");
+        token_match("RPARENT");
     }
     else if (Tokens[q] == "INTCON" || Tokens[q] == "PLUS" || Tokens[q] == "MINU")
         parse_Int(); // ＜整数＞
     else if (Tokens[q] == "CHARCON")
-        MatchToken("CHARCON");
-    cout << ("<因子>") << endl;
+        token_match("CHARCON");
     write << ("<因子>") << endl;
 }
 
@@ -655,77 +624,74 @@ void parse_sentence()
     if (Tokens[q] == "IFTK")
         parse_condition_sentence(); // ＜条件语句＞
     else if (Tokens[q] == "WHILETK" || Tokens[q] == "DOTK" || Tokens[q] == "FORTK")
-        parse21_circulate(); // ＜循环语句＞
+        parse_circulate(); // ＜循环语句＞
     else if (Tokens[q] == "LBRACE")
     {
-        MatchToken("LBRACE");
-        parse26(); // ＜语句列＞
-        MatchToken("RBRACE");
+        token_match("LBRACE");
+        parse_sentenceCol(); // ＜语句列＞
+        token_match("RBRACE");
     }
     else if (Tokens[q] == "IDENFR")
     {
         if (Tokens[q + 1] == "LPARENT")
         {
             parse_callFunc(); // ＜有无返回值函数调用语句＞
-            MatchToken("SEMICN");
+            token_match("SEMICN");
         }
         else
         {
             parse_assign_sentence(); // ＜赋值语句＞
-            MatchToken("SEMICN");
+            token_match("SEMICN");
         }
     }
     else if (Tokens[q] == "SCANFTK")
     {
-        parse27(); // ＜读语句＞
-        MatchToken("SEMICN");
+        parse_scanf(); // ＜读语句＞
+        token_match("SEMICN");
     }
     else if (Tokens[q] == "PRINTFTK")
     {
-        parse28(); // ＜写语句＞
-        MatchToken("SEMICN");
+        parse_printf(); // ＜写语句＞
+        token_match("SEMICN");
     }
     else if (Tokens[q] == "RETURNTK")
     {
-        parse29(); // ＜返回语句＞
-        MatchToken("SEMICN");
+        parse_return(); // ＜返回语句＞
+        token_match("SEMICN");
     }
     else if (Tokens[q] == "SEMICN")
-        MatchToken("SEMICN");
-    cout << ("<语句>") << endl;
+        token_match("SEMICN");
     write << ("<语句>") << endl;
 }
 
 void parse_assign_sentence()
 {
     // ＜赋值语句＞ ::=  ＜标识符＞＝＜表达式＞|＜标识符＞'['＜表达式＞']'=＜表达式＞
-    MatchToken("IDENFR");
+    token_match("IDENFR");
     if (Tokens[q] == "LBRACK")
     {
-        MatchToken("LBRACK");
+        token_match("LBRACK");
         parse_expression(); // ＜表达式＞
-        MatchToken("RBRACK");
+        token_match("RBRACK");
     }
-    MatchToken("ASSIGN");
+    token_match("ASSIGN");
     parse_expression(); // ＜表达式＞
-    cout << ("<赋值语句>") << endl;
     write << ("<赋值语句>") << endl;
 }
 
 void parse_condition_sentence()
 {
     // ＜条件语句＞ ::= if '('＜条件＞')'＜语句＞［else＜语句＞］
-    MatchToken("IFTK");
-    MatchToken("LPARENT");
+    token_match("IFTK");
+    token_match("LPARENT");
     parse_condition(); // ＜条件＞
-    MatchToken("RPARENT");
+    token_match("RPARENT");
     parse_sentence(); // ＜语句＞
     if (Tokens[q] == "ELSETK")
     {
-        MatchToken("ELSETK");
+        token_match("ELSETK");
         parse_sentence(); // ＜语句＞
     }
-    cout << ("<条件语句>") << endl;
     write << ("<条件语句>") << endl;
 }
 
@@ -736,57 +702,55 @@ void parse_condition()
     parse_expression(); // ＜表达式＞
     if (Tokens[q] == "LSS" || Tokens[q] == "LEQ" || Tokens[q] == "GRE" || Tokens[q] == "GEQ" || Tokens[q] == "EQL" || Tokens[q] == "NEQ")
     {
-        MatchToken((string)Tokens[q]);
+        token_match((string)Tokens[q]);
         parse_expression(); // ＜表达式＞
     }
-    cout << ("<条件>") << endl;
     write << ("<条件>") << endl;
 }
 
-void parse21_circulate()
+void parse_circulate()
 {
     // ＜循环语句＞ ::=  while '('＜条件＞')'＜语句＞
     //           |do＜语句＞while '('＜条件＞')'
     //           |for'('＜标识符＞＝＜表达式＞;＜条件＞;＜标识符＞＝＜标识符＞(+|-)＜步长＞')'＜语句＞
     if (Tokens[q] == "WHILETK")
     {
-        MatchToken("WHILETK");
-        MatchToken("LPARENT");
+        token_match("WHILETK");
+        token_match("LPARENT");
         parse_condition(); // ＜条件＞
-        MatchToken("RPARENT");
+        token_match("RPARENT");
         parse_sentence(); // ＜语句＞
     }
     else if (Tokens[q] == "DOTK")
     {
-        MatchToken("DOTK");
+        token_match("DOTK");
         parse_sentence(); // ＜语句＞
-        MatchToken("WHILETK");
-        MatchToken("LPARENT");
+        token_match("WHILETK");
+        token_match("LPARENT");
         parse_condition(); // ＜条件＞
-        MatchToken("RPARENT");
+        token_match("RPARENT");
     }
     else if (Tokens[q] == "FORTK")
     {
-        MatchToken("FORTK");
-        MatchToken("LPARENT");
-        MatchToken("IDENFR");
-        MatchToken("ASSIGN");
+        token_match("FORTK");
+        token_match("LPARENT");
+        token_match("IDENFR");
+        token_match("ASSIGN");
         parse_expression(); // ＜表达式＞
-        MatchToken("SEMICN");
+        token_match("SEMICN");
         parse_condition(); // ＜条件＞
-        MatchToken("SEMICN");
-        MatchToken("IDENFR");
-        MatchToken("ASSIGN");
-        MatchToken("IDENFR");
+        token_match("SEMICN");
+        token_match("IDENFR");
+        token_match("ASSIGN");
+        token_match("IDENFR");
         if (Tokens[q] == "PLUS")
-            MatchToken("PLUS");
+            token_match("PLUS");
         else if (Tokens[q] == "MINU")
-            MatchToken("MINU");
+            token_match("MINU");
         parse_step(); // ＜步长＞
-        MatchToken("RPARENT");
+        token_match("RPARENT");
         parse_sentence(); // ＜语句＞
     }
-    cout << ("<循环语句>") << endl;
     write << ("<循环语句>") << endl;
 }
 
@@ -794,7 +758,6 @@ void parse_step()
 {
     // ＜步长＞::= ＜无符号整数＞
     parse_unsignedInt(); // ＜无符号整数＞
-    cout << ("<步长>") << endl;
     write << ("<步长>") << endl;
 }
 
@@ -806,23 +769,21 @@ void parse_callFunc()
     {
         FunctionType = NVoidFunction[vals[q]];
     }
-    MatchToken("IDENFR");
-    MatchToken("LPARENT");
-    parse25(); // ＜值参数表＞
-    MatchToken("RPARENT");
+    token_match("IDENFR");
+    token_match("LPARENT");
+    parse_value_paraFrom(); // ＜值参数表＞
+    token_match("RPARENT");
     if (FunctionType == 1)
     {
-        cout << ("<有返回值函数调用语句>") << endl;
         write << ("<有返回值函数调用语句>") << endl;
     }
     else
     {
-        cout << ("<无返回值函数调用语句>") << endl;
         write << ("<无返回值函数调用语句>") << endl;
     }
 }
 
-void parse25()
+void parse_value_paraFrom()
 {
     // ＜值参数表＞ ::= ＜表达式＞{,＜表达式＞}｜＜空＞
     if (Tokens[q] != "RPARENT")
@@ -830,75 +791,70 @@ void parse25()
         parse_expression(); // ＜表达式＞
         while (Tokens[q] == "COMMA")
         {
-            MatchToken("COMMA");
+            token_match("COMMA");
             parse_expression();
         }
     }
-    cout << ("<值参数表>") << endl;
     write << ("<值参数表>") << endl;
 }
 
-void parse26()
+void parse_sentenceCol()
 {
     // ＜语句列＞ ::= ｛＜语句＞｝
     while (Tokens[q] != "RBRACE")
         parse_sentence(); // ＜语句＞
-    cout << ("<语句列>") << endl;
     write << ("<语句列>") << endl;
 }
 
-void parse27()
+void parse_scanf()
 {
     // ＜读语句＞ ::=  scanf '('＜标识符＞{,＜标识符＞}')'
-    MatchToken("SCANFTK");
-    MatchToken("LPARENT");
-    MatchToken("IDENFR");
+    token_match("SCANFTK");
+    token_match("LPARENT");
+    token_match("IDENFR");
     while (Tokens[q] == "COMMA")
     {
-        MatchToken("COMMA");
-        MatchToken("IDENFR");
+        token_match("COMMA");
+        token_match("IDENFR");
     }
-    MatchToken("RPARENT");
-    cout << ("<读语句>") << endl;
+    token_match("RPARENT");
     write << ("<读语句>") << endl;
 }
 
-void parse28()
+void parse_printf()
 {
     // ＜写语句＞ ::= printf '(' ＜字符串＞,＜表达式＞ ')'
     //           | printf '('＜字符串＞ ')'
     //           | printf '('＜表达式＞')'
-    MatchToken("PRINTFTK");
-    MatchToken("LPARENT");
+    token_match("PRINTFTK");
+    token_match("LPARENT");
     if (Tokens[q] == "STRCON")
         parse_str(); // ＜字符串＞
     else
         parse_expression(); // ＜表达式＞
     if (Tokens[q] == "COMMA")
     {
-        MatchToken("COMMA");
+        token_match("COMMA");
         parse_expression(); // ＜表达式＞
     }
-    MatchToken("RPARENT");
-    cout << ("<写语句>") << endl;
+    token_match("RPARENT");
     write << ("<写语句>") << endl;
 }
 
-void parse29()
+void parse_return()
 {
     // ＜返回语句＞ ::=  return['('＜表达式＞')']
-    MatchToken("RETURNTK");
+    token_match("RETURNTK");
     if (Tokens[q] == "LPARENT")
     {
-        MatchToken("LPARENT");
+        token_match("LPARENT");
         parse_expression(); // ＜表达式＞
-        MatchToken("RPARENT");
+        token_match("RPARENT");
     }
-    cout << ("<返回语句>") << endl;
     write << ("<返回语句>") << endl;
 }
 
-void MatchToken(string expected)
+void token_match(string expected)
 {
     if (Tokens[q] == expected)
     {
@@ -911,4 +867,20 @@ void MatchToken(string expected)
         cout << "syntax error!" << endl;
         exit(0);
     }
+}
+
+int main()
+{
+    init();
+    lines = 1;
+    string line;
+    while (getline(read, line))
+    {
+        lexAnalysing(line);
+        lines++;
+    }
+    parsing();
+    write.close();
+    read.close();
+    return 0;
 }

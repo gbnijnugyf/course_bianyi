@@ -3,23 +3,24 @@
 #include <string>
 #include <algorithm>
 #include <cctype>
+using namespace std;
 
-bool compareFiles(const std::string& file1, const std::string& file2) {
-    std::ifstream input1(file1);
-    std::ifstream input2(file2);
+bool compareFiles(const string& file1, const string& file2) {
+    ifstream input1(file1);
+    ifstream input2(file2);
 
     if (!input1.is_open() || !input2.is_open()) {
-        std::cout << "Failed to open files." << std::endl;
+        cout << "Failed to open files." << endl;
         return false;
     }
 
     // 将文件内容读取到字符串中
-    std::string content1((std::istreambuf_iterator<char>(input1)), std::istreambuf_iterator<char>());
-    std::string content2((std::istreambuf_iterator<char>(input2)), std::istreambuf_iterator<char>());
+    string content1((istreambuf_iterator<char>(input1)), istreambuf_iterator<char>());
+    string content2((istreambuf_iterator<char>(input2)), istreambuf_iterator<char>());
 
     // 去除空格、制表符和换行符
-    content1.erase(std::remove_if(content1.begin(), content1.end(), [](char c) { return std::isspace(static_cast<unsigned char>(c)); }), content1.end());
-    content2.erase(std::remove_if(content2.begin(), content2.end(), [](char c) { return std::isspace(static_cast<unsigned char>(c)); }), content2.end());
+    content1.erase(remove_if(content1.begin(), content1.end(), [](char c) { return isspace(static_cast<unsigned char>(c)); }), content1.end());
+    content2.erase(remove_if(content2.begin(), content2.end(), [](char c) { return isspace(static_cast<unsigned char>(c)); }), content2.end());
 
     input1.close();
     input2.close();
@@ -29,13 +30,13 @@ bool compareFiles(const std::string& file1, const std::string& file2) {
 }
 
 int main() {
-    std::string file1 = "output_cor_yufa.txt";
-    std::string file2 = "output.txt";
+    string file1 = "output_cor_yufa.txt";
+    string file2 = "output.txt";
 
     if (compareFiles(file1, file2)) {
-        std::cout << "Files are identical." << std::endl;
+        cout << "Files are identical." << endl;
     } else {
-        std::cout << "Files are different." << std::endl;
+        cout << "Files are different." << endl;
     }
 
     return 0;
